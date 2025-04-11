@@ -21,7 +21,6 @@ controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 
 // List of all the Event Listerner
-
 const functionDescriptions = {
   fun1: `1. Extrudes the edges of a user-defined polygon into 3D faces.\n2. Calculates and visualizes interior angles at each vertex.\n3. Draws directional arrows (cutting lines) based on angle bisectors.\n4. Dynamically reshapes the extrusion tops to follow these bisectors.`,
   fun2: `1. Creates a stylized door using curved geometries.\n2. Adds circular holes for decoration or handles.\n3. Includes multiple decorative handles for realism.`,
@@ -33,8 +32,11 @@ const functionDescriptions = {
   fun8: `1. Models a detailed lock handle system.\n2. Uses curves and pits for ergonomic shape.\n3. Includes mechanisms to simulate a working key system.`,
   fun9: `1. Builds a patio-style handle mechanism.\n2. Uses cylinders for body and toruses for grips.\n3. Adds a functional keyhole for locking features.`,
   fun10: `1. Creates a lift-and-slide handle system for sliding doors.\n2. Features a long backplate for support.\n3. Optionally includes a screw placement.`,
-  fun11: `1. Generates an advanced handle or extended lock mechanism.\n2. Supports complex multi-part construction.\n3. (Still in development for extended features.)`
+  fun11: `1. Generates an advanced handle or extended lock mechanism.\n2. Supports complex multi-part construction.\n3. (Still in development for extended features.)` ,
+  fun12: `1. Solar system)`
 };
+
+
 
 const infoPanel = document.getElementById("info-panel");
 const infoContent = document.getElementById("info-content");
@@ -50,13 +52,13 @@ function loadProject(functionRef, name) {
   clearScene();
   scene = new THREE.Scene();
   functionRef();
-  infoContent.innerText = functionDescriptions[name] || "No info available for this function.";
+  infoContent.innerText = functionDescriptions[name] || "No info available for this .";
   infoContent.style.display = "block";
 }
 
 // Update button listeners to pass name string
 function allEventListenerHandles() {
-  loadProject(home, 'home');
+  // loadProject(home, 'home');
   document.getElementById("btn1").addEventListener("click", () => loadProject(fun1, 'fun1'));
   document.getElementById("btn2").addEventListener("click", () => loadProject(fun2, 'fun2'));
   document.getElementById("btn3").addEventListener("click", () => loadProject(fun3, 'fun3'));
@@ -68,6 +70,7 @@ function allEventListenerHandles() {
   document.getElementById("btn9").addEventListener("click", () => loadProject(fun9, 'fun9'));
   document.getElementById("btn10").addEventListener("click", () => loadProject(fun10, 'fun10'));
   document.getElementById("btn11").addEventListener("click", () => loadProject(fun11, 'fun11'));
+  document.getElementById("btn12").addEventListener("click", () => loadProject(fun12, 'fun12'));
 }
 
 // Clear previous scene
@@ -76,11 +79,11 @@ function clearScene() {
 
   if (scene) {
     console.log(scene.children);
-    
+
     scene.traverse((object) => {
       if (!object.isMesh) return;
       if (object.geometry) object.geometry.dispose();
-      
+
       if (object.material) {
         if (Array.isArray(object.material)) {
           object.material.forEach((mat) => mat.dispose());
@@ -113,8 +116,8 @@ function animate(updateFn) {
 // Project Functions Start Here
 
 function home() {
-  camera.position.set(0 , 0 , 2);
-  
+  camera.position.set(0, 0, 2);
+
   const loader = new GLTFLoader();
   const dracoLoader = new DRACOLoader();
   dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.6/'); // CDN path for decoder
@@ -122,7 +125,7 @@ function home() {
   loader.load(
     './Model/forest_house.glb', // path to your GLB file
     function (gltf) {
-      gltf.scene.position.set(0, -2, -4);      
+      gltf.scene.position.set(0, -2, -4);
       scene.add(gltf.scene);
 
     },
@@ -2612,6 +2615,92 @@ function fun11() {
 }
 
 //#endregion
+
+//#region Texture Mapping Fun11
+
+function fun12() {
+  // Directional Lights
+  const directionalTop = new THREE.DirectionalLight(0xffffff, 1);
+  directionalTop.position.set(0, 50, 0);
+  scene.add(directionalTop);
+
+  const directionalDown = new THREE.DirectionalLight(0xffffff, 1);
+  directionalDown.position.set(0, -20, -50);
+  scene.add(directionalDown);
+
+  const directionalRight = new THREE.DirectionalLight(0xffffff, 1);
+  directionalRight.position.set(50, 0, 50);
+  scene.add(directionalRight);
+
+  const directionalLight4 = new THREE.DirectionalLight(0xffffff, 1);
+  directionalLight4.position.set(-50, 0, 0);
+  scene.add(directionalLight4);
+
+  // Loaders
+  const loader = new THREE.TextureLoader();
+  const textureLoader = new THREE.TextureLoader();
+  const cubeTextureLoader = new THREE.CubeTextureLoader();
+
+  function loadColorTexture(path) {
+    const texture = loader.load(path);
+    texture.colorSpace = THREE.SRGBColorSpace;
+    texture.minFilter = THREE.LinearFilter;
+    return texture;
+  }
+
+  // Sun
+  const sunGeo = new THREE.SphereGeometry(16, 30, 30);
+  const sunMat = new THREE.MeshStandardMaterial({
+    map: loadColorTexture("/Planets/sun.jpg"),
+    color: 0xffffff,
+    roughness: 1,
+    metalness: 0,
+  });
+  const sun = new THREE.Mesh(sunGeo, sunMat);
+  scene.add(sun);
+
+  // Background Stars
+  const starsTexture = '/Planets/stars.jpg';
+  scene.background = cubeTextureLoader.load([
+    starsTexture, starsTexture, starsTexture,
+    starsTexture, starsTexture, starsTexture
+  ]);
+
+  // Planet Pivots for Orbit
+  const planetPivots = [];
+
+  function createPlanet(size, texturePath, distanceFromSun, speed) {
+    const geometry = new THREE.SphereGeometry(size, 30, 30);
+    const material = new THREE.MeshStandardMaterial({
+      map: textureLoader.load(texturePath),
+    });
+    const mesh = new THREE.Mesh(geometry, material);
+
+    const pivot = new THREE.Object3D();
+    scene.add(pivot);
+
+    mesh.position.x = distanceFromSun;
+    pivot.add(mesh);
+
+    planetPivots.push({ pivot, speed });
+    return mesh;
+  }
+
+  const mercury = createPlanet(3.2, '/Planets/mercury.jpg', 28, 0.04);
+  const venus = createPlanet(5.8, '/Planets/venus.jpg', 44, 0.015);
+  const earth = createPlanet(6, '/Planets/earth.jpg', 62, 0.01);
+
+  // Animation
+  animate(() => {
+    planetPivots.forEach(({ pivot, speed }) => {
+      pivot.rotation.y += speed;
+    });
+  });
+}
+
+//#endregion
+
+
 
 //#region  Start the app when DOM is loaded
 window.addEventListener("DOMContentLoaded", allEventListenerHandles);
