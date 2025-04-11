@@ -58,7 +58,7 @@ function loadProject(functionRef, name) {
 
 // Update button listeners to pass name string
 function allEventListenerHandles() {
-  // loadProject(home, 'home');
+  loadProject(home, 'home');
   document.getElementById("btn1").addEventListener("click", () => loadProject(fun1, 'fun1'));
   document.getElementById("btn2").addEventListener("click", () => loadProject(fun2, 'fun2'));
   document.getElementById("btn3").addEventListener("click", () => loadProject(fun3, 'fun3'));
