@@ -23,17 +23,17 @@ controls.enableDamping = true;
 // List of all the Event Listerner
 
 const functionDescriptions = {
-  fun1: "Draws polygon on a plane, extrudes shapes and calculates internal angles and directions.",
-  fun2: "Creates a door with curved edges, circular holes, and multiple decorative handles.",
-  fun3: "Builds a hollow extruded rectangular shape using sliced curves for cuts.",
-  fun4: "Displays a simple brick-textured extruded block.",
-  fun5: "Renders a 3D Earth using sphere geometry and texture mapping.",
-  fun6: "Demonstrates CSG using intersecting cube and sphere with subtractive cylinder shapes.",
-  fun7: "Creates a lock base with circular holes, extrusions, and a triangle latch.",
-  fun8: "Models a complex lock handle with curves, pits, and key mechanisms.",
-  fun9: "Builds a patio handle system using cylinders, toruses, and a keyhole.",
-  fun10: "Generates a lift-and-slide handle with long backplate and optional key.",
-  fun11: "Creates an advanced handle structure or extended lock mechanism. (TBD)"
+  fun1: `1. Extrudes the edges of a user-defined polygon into 3D faces.\n2. Calculates and visualizes interior angles at each vertex.\n3. Draws directional arrows (cutting lines) based on angle bisectors.\n4. Dynamically reshapes the extrusion tops to follow these bisectors.`,
+  fun2: `1. Creates a stylized door using curved geometries.\n2. Adds circular holes for decoration or handles.\n3. Includes multiple decorative handles for realism.`,
+  fun3: `1. Generates a hollow extruded rectangular shape.\n2. Uses sliced curves to subtract internal cut-out areas.\n3. Demonstrates subtracted extrusion.`,
+  fun4: `1. Displays a 3D block extruded from a rectangular base.\n2. Applies a brick wall texture to simulate material.\n3. Useful for basic architectural or material demos.`,
+  fun5: `1. Renders a 3D Earth using a sphere geometry.\n2. Maps high-res textures of the globe to the surface.\n3. Great for educational or environmental scenes.`,
+  fun6: `1. Demonstrates CSG (Constructive Solid Geometry).\n2. Intersects a cube and sphere together.\n3. Union all three cylinder to form desire 3D geometry.\n4. Subtracts a cylinder from the spere cube to form complex 3D structures.`,
+  fun7: `1. Constructs a lock base with mechanical elements.\n2. Adds circular holes as screw placements.\n3. Forms a triangular latch via extrusion.`,
+  fun8: `1. Models a detailed lock handle system.\n2. Uses curves and pits for ergonomic shape.\n3. Includes mechanisms to simulate a working key system.`,
+  fun9: `1. Builds a patio-style handle mechanism.\n2. Uses cylinders for body and toruses for grips.\n3. Adds a functional keyhole for locking features.`,
+  fun10: `1. Creates a lift-and-slide handle system for sliding doors.\n2. Features a long backplate for support.\n3. Optionally includes a screw placement.`,
+  fun11: `1. Generates an advanced handle or extended lock mechanism.\n2. Supports complex multi-part construction.\n3. (Still in development for extended features.)`
 };
 
 const infoPanel = document.getElementById("info-panel");
