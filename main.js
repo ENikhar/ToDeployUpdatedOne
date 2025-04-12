@@ -32,8 +32,11 @@ const functionDescriptions = {
   fun8: `1. Models a detailed lock handle system.\n2. Uses curves and pits for ergonomic shape.\n3. Includes mechanisms to simulate a working key system.`,
   fun9: `1. Builds a patio-style handle mechanism.\n2. Uses cylinders for body and toruses for grips.\n3. Adds a functional keyhole for locking features.`,
   fun10: `1. Creates a lift-and-slide handle system for sliding doors.\n2. Features a long backplate for support.\n3. Optionally includes a screw placement.`,
-  fun11: `1. Generates an advanced handle or extended lock mechanism.\n2. Supports complex multi-part construction.\n3. (Still in development for extended features.)` ,
-  fun12: `1. Solar system)`
+  fun11: `1. Generates an advanced handle or extended lock mechanism.\n2. Supports complex multi-part construction.\n3. (Still in development for extended features.)`,
+  fun12: `1. Solar system`,
+  fun13: `1. Lightning`,
+  fun14: `1. Lock`,
+  home: `1. Home Page Loading (.glb)`,
 };
 
 
@@ -71,6 +74,8 @@ function allEventListenerHandles() {
   document.getElementById("btn10").addEventListener("click", () => loadProject(fun10, 'fun10'));
   document.getElementById("btn11").addEventListener("click", () => loadProject(fun11, 'fun11'));
   document.getElementById("btn12").addEventListener("click", () => loadProject(fun12, 'fun12'));
+  document.getElementById("btn13").addEventListener("click", () => loadProject(fun13, 'fun13'));
+  document.getElementById("btn14").addEventListener("click", () => loadProject(fun14, 'fun14'));
 }
 
 // Clear previous scene
@@ -2616,7 +2621,7 @@ function fun11() {
 
 //#endregion
 
-//#region Texture Mapping Fun11
+//#region Texture Mapping Fun12
 
 function fun12() {
   // Directional Lights
@@ -2669,7 +2674,7 @@ function fun12() {
   // Planet Pivots for Orbit
   const planetPivots = [];
 
-  function createPlanet(size, texturePath, distanceFromSun, speed) {
+  function createPlanetOrbit(size, texturePath, distanceFromSun, speed) {
     const geometry = new THREE.SphereGeometry(size, 30, 30);
     const material = new THREE.MeshStandardMaterial({
       map: textureLoader.load(texturePath),
@@ -2686,20 +2691,398 @@ function fun12() {
     return mesh;
   }
 
-  const mercury = createPlanet(3.2, '/Planets/mercury.jpg', 28, 0.04);
-  const venus = createPlanet(5.8, '/Planets/venus.jpg', 44, 0.015);
-  const earth = createPlanet(6, '/Planets/earth.jpg', 62, 0.01);
+  const mercury = createPlanetOrbit(3.2, '/Planets/mercury.jpg', 28, 0.04);
+  const venus = createPlanetOrbit(5.8, '/Planets/venus.jpg', 44, 0.015);
+  const earth = createPlanetOrbit(6, '/Planets/earth.jpg', 62, 0.01);
 
   // Animation
   animate(() => {
     planetPivots.forEach(({ pivot, speed }) => {
       pivot.rotation.y += speed;
+      mercury.rotateY(speed * 2);
     });
   });
 }
-
 //#endregion
 
+//#region Hnadle Base Function 13
+let dHandlewidth = 100;
+let dHandleheight = 200;
+let dHandle_y_key_pos = 0;
+function fun13() {
+  camera.position.z = 900;
+  camera.position.y = 700;
+  renderer.shadowMap.enabled = true;
+
+  const directionalTop = new THREE.DirectionalLight(0xffffff, 0.2);
+  directionalTop.position.set(-150, 120, -200);
+  directionalTop.castShadow = true;
+  scene.add(directionalTop);
+
+
+  const spotLight = new THREE.SpotLight(0xffffff, 100000);
+  spotLight.position.set(-150, 120, 200);
+  spotLight.target.position.set(-150, 100, 0);
+  scene.add(spotLight.target);
+  spotLight.castShadow = true;
+  scene.add(spotLight);
+
+
+  const cameraHelper = new THREE.CameraHelper(spotLight.shadow.camera);
+  // scene.add(cameraHelper);
+
+  const x_Patio_handle = -200,
+    y_Patio_handle = 0,
+    z_Patio_handle = 0;
+
+  const origin = new THREE.Vector2(0, 0);
+  const path = new THREE.Shape();
+  path.absarc(
+    origin.x + dHandlewidth / 2,
+    origin.y,
+    dHandlewidth / 2,
+    Math.PI,
+    0,
+    false
+  );
+  path.lineTo(origin.x + dHandlewidth, origin.y + dHandleheight);
+  path.absarc(
+    origin.x + dHandlewidth / 2,
+    origin.y + dHandleheight,
+    dHandlewidth / 2,
+    0,
+    Math.PI,
+    false
+  );
+  path.lineTo();
+
+  let upWidth = 55,
+    upLength = 55;
+  const key = new THREE.Shape();
+
+  const x_key_pos = dHandlewidth / 2 - upWidth / 4;
+  let y_pos = dHandle_y_key_pos + upLength + upWidth / 2;
+  if (y_pos < upLength + upWidth / 2) {
+    y_pos = upLength + upWidth / 2;
+  }
+  if (
+    y_pos >=
+    dHandlewidth / 2 + upLength + upWidth / 2 + upLength + upWidth / 2
+  ) {
+    y_pos =
+      dHandlewidth / 2 + upLength + upWidth / 2 + upLength + upWidth / 2 - 2;
+  }
+  upWidth /= 2;
+  const keyOrigin = new THREE.Vector2(x_key_pos, y_pos);
+  key.absarc(
+    keyOrigin.x + upWidth / 2,
+    +keyOrigin.y,
+    upWidth / 2,
+    -Math.PI / 3,
+    Math.PI + Math.PI / 3,
+    false
+  );
+  key.absarc(
+    keyOrigin.x + upWidth / 2,
+    -upLength + keyOrigin.y,
+    upWidth / 4,
+    Math.PI,
+    0,
+    false
+  );
+  path.holes.push(key);
+
+
+  const baseExtrude = 5;
+  const geo = new THREE.ExtrudeGeometry(path, {
+    depth: baseExtrude,
+    bevelEnabled: false,
+  });
+  const geoMat = new THREE.MeshStandardMaterial({
+    color: "#FFEBD3",
+    wireframe: false,
+  });
+  const mesh = new THREE.Mesh(geo, geoMat);
+  mesh.position.set(x_Patio_handle, y_Patio_handle, z_Patio_handle);
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
+  scene.add(mesh);
+  //#region to uncomment
+
+  //#endregion
+
+  const shadowPlane = new THREE.PlaneGeometry(800, 1800);
+  const shadowPlaneMaterial = new THREE.MeshStandardMaterial({ color: 'white', side: THREE.DoubleSide });
+  const shadowMesh = new THREE.Mesh(shadowPlane, shadowPlaneMaterial);
+  // shadowMesh.rotateX(Math.PI / 2);
+  shadowMesh.position.set(-150, -100, -200);
+  shadowMesh.receiveShadow = true;
+  const h = new THREE.AxesHelper(10);
+  // scene.add(h);
+  scene.add(shadowMesh);
+
+  animate(() => { });
+}
+//#endregion
+
+//#region Handle Base Function 14
+function fun14() {
+  camera.position.set(0 , 0 , 100);
+  renderer.shadowMap.enabled = true;
+
+  const directionalTop = new THREE.DirectionalLight(0xffffff, 1);
+  directionalTop.position.set(0, 50, 0);
+  scene.add(directionalTop);
+
+  const directionalDown = new THREE.DirectionalLight(0xffffff, 1);
+  directionalDown.position.set(0, -20, -50);
+  scene.add(directionalDown);
+
+  const directionalRight = new THREE.DirectionalLight(0xffffff, 1);
+  directionalRight.position.set(50, 0, 50);
+  scene.add(directionalRight);
+
+  const directionalLight4 = new THREE.DirectionalLight(0xffffff, 1);
+  directionalLight4.position.set(-50, 0, 0);
+  scene.add(directionalLight4);
+
+
+  let barrelCatchExtrusionDepth = 5;
+  let basePlateWidth = 10;
+  let barrel_lock_offset = basePlateWidth / 10;
+  let basePlateHeight = 60;
+  let slitExtrusionDepth = 10;
+  let doorLocked = true;
+  let holeBasePlateDiameter = basePlateWidth / 4;
+
+
+  function barrelKeep(curveWidth_extrusionDepth) {
+    const shape = new THREE.Shape();
+    shape.moveTo(basePlateWidth / 2, 0);
+    shape.absarc(0, 0, basePlateWidth / 2, 0, Math.PI, false);
+    shape.lineTo(-basePlateWidth / 2, - (basePlateWidth / 2 - barrel_lock_offset));
+    shape.lineTo(-basePlateWidth / 2 + barrel_lock_offset, - (basePlateWidth / 2 - barrel_lock_offset));
+    shape.absarc(0, 0, basePlateWidth / 2 - barrel_lock_offset, Math.PI, 0, true);
+    shape.lineTo(basePlateWidth / 2 - barrel_lock_offset, - (basePlateWidth / 2 - barrel_lock_offset));
+    shape.lineTo(basePlateWidth / 2, - (basePlateWidth / 2 - barrel_lock_offset));
+    shape.closePath();
+
+    const geometry = new THREE.ExtrudeGeometry(shape, { depth: curveWidth_extrusionDepth });
+    const material = new THREE.MeshPhysicalMaterial({
+      color: "#91a3b0",
+      wireframe: false,
+    });
+    const mesh = new THREE.Mesh(geometry, material);
+
+    return mesh;
+  }
+
+  function barrel() {
+    const shape = new THREE.Shape();
+    shape.moveTo(0, 0);
+    shape.absarc(0, 0, basePlateWidth / 2 - barrel_lock_offset, 0, Math.PI * 2, false);
+
+    const extrudeSettings = {
+      depth: basePlateHeight,
+      bevelEnabled: false,
+    };
+    const barrel_geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+    const barrel_material = new THREE.MeshPhysicalMaterial({
+      color: "#cfcfc4",
+      wireframe: false,
+    });
+    const barrel_mesh = new THREE.Mesh(barrel_geometry, barrel_material);
+
+    return barrel_mesh
+  }
+
+  function barrelHandle(radius, height) {
+    const shape = new THREE.Shape();
+    shape.absarc(0, 0, radius / 2, 0, Math.PI * 2, false);
+    const geometry = new THREE.ExtrudeGeometry(shape, { depth: height });
+    const material = new THREE.MeshPhysicalMaterial({
+      color: "#c4c3d0",
+      wireframe: false,
+    });
+    const mesh = new THREE.Mesh(geometry, material);
+
+    return mesh;
+  }
+
+  function createHoleAt(x, y, diameter) {
+    const hole = new THREE.Path();
+    hole.absarc(x, y, diameter / 2, 0, Math.PI * 2, false);
+    return hole;
+  }
+
+  function slit() {
+
+    const shape = new THREE.Shape();
+    shape.moveTo(0, 0);
+    shape.lineTo(0, basePlateWidth / 2 + barrel_lock_offset);
+    shape.absarc(-basePlateWidth / 4, basePlateWidth / 2 + barrel_lock_offset + 1, basePlateWidth / 5, 0, Math.PI / 2, false);
+    shape.absarc(-basePlateWidth / 4, basePlateWidth / 2 + barrel_lock_offset + 1, basePlateWidth / 7, Math.PI / 2, 0, true);
+    shape.lineTo(-basePlateWidth / 4 + basePlateWidth / 7, 0);
+    const extrudeSettings = {
+      depth: slitExtrusionDepth,
+      bevelEnabled: false,
+    };
+    const basePlate_geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+    const basePlate_material = new THREE.MeshPhysicalMaterial({
+      color: "grey",
+      wireframe: false,
+    });
+    const basePlate_mesh = new THREE.Mesh(basePlate_geometry, basePlate_material);
+
+    return basePlate_mesh;
+  }
+
+
+  function barrelCatch() {
+    let barrelCatchHeight = 20;
+    const shape = new THREE.Shape();
+    shape.moveTo(0, -basePlateWidth / 2);
+    shape.lineTo(barrelCatchHeight / 2, -basePlateWidth / 2);
+    shape.lineTo(barrelCatchHeight / 2, basePlateWidth + basePlateWidth / 2);
+    shape.lineTo(-barrelCatchHeight / 2, basePlateWidth + basePlateWidth / 2);
+    shape.lineTo(-barrelCatchHeight / 2, -basePlateWidth / 2);
+    shape.closePath();
+
+    const holePositions = [
+      { x: 0, y: -basePlateWidth / 2 + holeBasePlateDiameter, diameter: holeBasePlateDiameter },
+      { x: 0, y: basePlateWidth * 1.5 - holeBasePlateDiameter, diameter: holeBasePlateDiameter },
+    ];
+
+    holePositions.forEach(pos => {
+      const hole = createHoleAt(pos.x, pos.y, pos.diameter);
+      shape.holes.push(hole);
+    });
+
+    const extrudeSettings = {
+      depth: barrel_lock_offset,
+      bevelEnabled: false,
+    };
+
+    const basePlate_geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+    const basePlate_material = new THREE.MeshPhysicalMaterial({
+      color: "#a9a9a9",
+      wireframe: false,
+    });
+    const basePlate_mesh = new THREE.Mesh(basePlate_geometry, basePlate_material);
+
+
+    // barrelkeep
+    let barrelCatchExtrusionDepth = 10
+    const curveShapeLeft = barrelKeep(barrelCatchExtrusionDepth);
+    curveShapeLeft.rotateX(Math.PI / 2);
+    curveShapeLeft.rotateY(Math.PI / 2);
+    curveShapeLeft.position.set(- barrelCatchExtrusionDepth / 2, basePlateWidth / 2, basePlateWidth / 2);
+    basePlate_mesh.add(curveShapeLeft);
+
+
+    return basePlate_mesh;
+  }
+
+  function basePlate() {
+    const shape = new THREE.Shape();
+    shape.moveTo(0, -basePlateWidth / 2);
+    shape.lineTo(basePlateHeight / 2, -basePlateWidth / 2);
+    shape.lineTo(basePlateHeight / 2, basePlateWidth + basePlateWidth / 2);
+    shape.lineTo(-basePlateHeight / 2, basePlateWidth + basePlateWidth / 2);
+    shape.lineTo(-basePlateHeight / 2, -basePlateWidth / 2);
+    shape.closePath();
+
+    const holePositions = [
+      { x: basePlateHeight / 2 - basePlateHeight / 8, y: -basePlateWidth / 2 + holeBasePlateDiameter, diameter: holeBasePlateDiameter },
+      { x: - basePlateHeight / 2 + basePlateHeight / 8, y: -basePlateWidth / 2 + holeBasePlateDiameter, diameter: holeBasePlateDiameter },
+      { x: basePlateHeight / 2 - basePlateHeight / 8, y: basePlateWidth * 1.5 - holeBasePlateDiameter, diameter: holeBasePlateDiameter },
+      { x: - basePlateHeight / 2 + basePlateHeight / 8, y: basePlateWidth * 1.5 - holeBasePlateDiameter, diameter: holeBasePlateDiameter },
+    ];
+
+    holePositions.forEach(pos => {
+      const hole = createHoleAt(pos.x, pos.y, pos.diameter);
+      shape.holes.push(hole);
+    });
+
+    const extrudeSettings = {
+      depth: barrel_lock_offset,
+      bevelEnabled: false,
+    };
+
+    const basePlate_geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+    const basePlate_material = new THREE.MeshPhysicalMaterial({
+      color: "#a9a9a9",
+      wireframe: false,
+    });
+    const basePlate_mesh = new THREE.Mesh(basePlate_geometry, basePlate_material);
+    scene.add(basePlate_mesh);
+
+    // kundi Curves
+    const curveShapeLeft = barrelKeep(barrelCatchExtrusionDepth);
+    curveShapeLeft.rotateX(Math.PI / 2);
+    curveShapeLeft.rotateY(Math.PI / 2);
+    curveShapeLeft.position.set(-basePlateHeight / 2, basePlateWidth / 2, basePlateWidth / 2);
+    basePlate_mesh.add(curveShapeLeft);
+
+    const curveShapeRight = barrelKeep(barrelCatchExtrusionDepth * 5);
+    curveShapeRight.rotateX(Math.PI / 2);
+    curveShapeRight.rotateY(Math.PI / 2);
+    curveShapeRight.position.set(basePlateHeight / 2 - barrelCatchExtrusionDepth * 5, basePlateWidth / 2, basePlateWidth / 2);
+    basePlate_mesh.add(curveShapeRight);
+
+    // barrel
+    const barrelShape = barrel();
+    barrelShape.rotateX(Math.PI / 2);
+    barrelShape.rotateY(Math.PI / 2);
+    barrelShape.position.set(-basePlateHeight / 2, basePlateWidth / 2, basePlateWidth / 2);
+    if (doorLocked) {
+      barrelShape.position.set(-basePlateHeight / 6, basePlateWidth / 2, basePlateWidth / 2);
+    }
+    basePlate_mesh.add(barrelShape);
+
+    // barrelHandle
+    let barrelHandleRadius = basePlateWidth / 2.5;
+    let barrelHandleHeight = 3;
+
+    const barrelHandleShape_small = barrelHandle(barrelHandleRadius, barrelHandleHeight * 1);
+    barrelHandleShape_small.position.set(-basePlateWidth / 2 - barrelHandleHeight / 2, 0, barrelCatchExtrusionDepth * 2.5);
+    barrelHandleShape_small.rotateY(Math.PI / 2);
+    barrelShape.add(barrelHandleShape_small)
+
+    const barrelHandleShape_big = barrelHandle(barrelHandleRadius * 1.5, barrelHandleHeight * 3);
+    barrelHandleShape_big.position.set(0, 0, 0);
+    barrelHandleShape_big.rotateX(Math.PI)
+    barrelHandleShape_small.add(barrelHandleShape_big);
+
+
+    // slit - down
+    const slitDown = slit();
+    slitDown.rotateX(Math.PI / 2);
+    slitDown.rotateY(-Math.PI / 2);
+    slitDown.position.z = 0.1;
+    basePlate_mesh.add(slitDown);
+
+    // slit - up
+    const slitUp = slit();
+    slitUp.rotateX(Math.PI / 2);
+    slitUp.rotateY(Math.PI / 2);
+    slitUp.position.set(-slitExtrusionDepth, basePlateWidth, 0.1);
+    basePlate_mesh.add(slitUp);
+
+
+    // barrelCatch
+    const barrelCatchShape = barrelCatch();
+    // barrelCatchShape.rotateX(Math.PI / 2);
+    // barrelCatchShape.rotateY(Math.PI / 2);
+    barrelCatchShape.position.set(basePlateHeight - basePlateHeight / 4, 0, 0);
+    basePlate_mesh.add(barrelCatchShape);
+
+
+    animate(() => { });
+  }
+  basePlate();
+}
+//#endregion
 
 
 //#region  Start the app when DOM is loaded
